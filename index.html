@@ -56,11 +56,11 @@
             </div>
             <div class="bg-white p-5 rounded-3xl border border-emerald-50 shadow-sm flex items-center gap-4">
                 <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500"><i class="fa-solid fa-check"></i></div>
-                <div><p class="text-[10px] font-bold text-emerald-500 uppercase">ว่าง</p><h2 id="stat-available" class="text-xl font-bold text-emerald-600">0</h2></div>
+                <div><p class="text-[10px] font-bold text-emerald-500 uppercase">มีอยู่</p><h2 id="stat-available" class="text-xl font-bold text-emerald-600">0</h2></div>
             </div>
             <div class="bg-white p-5 rounded-3xl border border-orange-50 shadow-sm flex items-center gap-4">
                 <div class="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-500"><i class="fa-solid fa-clock"></i></div>
-                <div><p class="text-[10px] font-bold text-orange-500 uppercase">ยืมอยู่</p><h2 id="stat-borrowed" class="text-xl font-bold text-orange-600">0</h2></div>
+                <div><p class="text-[10px] font-bold text-orange-500 uppercase">ถูกยืม</p><h2 id="stat-borrowed" class="text-xl font-bold text-orange-600">0</h2></div>
             </div>
             <div class="bg-white p-5 rounded-3xl border border-rose-50 shadow-sm flex items-center gap-4">
                 <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -70,12 +70,20 @@
 
         <!-- Main Workspace -->
         <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-            <!-- Navigation -->
+            <!-- Navigation with Icons -->
             <div class="flex overflow-x-auto border-b border-slate-50 scrollbar-hide">
-                <button onclick="switchTab('all')" id="tab-all" class="px-6 py-4 text-xs font-bold whitespace-nowrap tab-active transition-all">หนังสือทั้งหมด</button>
-                <button onclick="switchTab('borrows')" id="tab-borrows" class="px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">รายการยืมคืน</button>
-                <button onclick="switchTab('lost')" id="tab-lost" class="px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">แจ้งหาย/ชำรุด</button>
-                <button onclick="switchTab('history')" id="tab-history" class="px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">ประวัติการคืน</button>
+                <button onclick="switchTab('all')" id="tab-all" class="flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap tab-active transition-all">
+                    <i class="fa-solid fa-layer-group"></i> หนังสือทั้งหมด
+                </button>
+                <button onclick="switchTab('borrows')" id="tab-borrows" class="flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">
+                    <i class="fa-solid fa-arrow-right-arrow-left"></i> รายการยืมคืน
+                </button>
+                <button onclick="switchTab('lost')" id="tab-lost" class="flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">
+                    <i class="fa-solid fa-circle-exclamation"></i> แจ้งหาย/ชำรุด
+                </button>
+                <button onclick="switchTab('history')" id="tab-history" class="flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all">
+                    <i class="fa-solid fa-clock-rotate-left"></i> ประวัติการคืน
+                </button>
             </div>
 
             <!-- Toolbar -->
@@ -117,8 +125,9 @@
                 <div id="f-status-group">
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block">สถานะ</label>
                     <select id="f-status" class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none cursor-pointer">
-                        <option value="available">พร้อมใช้งาน</option>
-                        <option value="lost">แจ้งหาย/ชำรุด</option>
+                        <option value="available">มีอยู่</option>
+                        <option value="borrowed">ถูกยืม</option>
+                        <option value="lost">หาย</option>
                     </select>
                 </div>
                 <div class="flex gap-2 mt-8">
@@ -169,14 +178,12 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Books Sync
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'books'), (snap) => {
                     books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                     renderData();
                     updateStats();
                 });
 
-                // History Sync
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'history'), (snap) => {
                     history = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => (b.at?.seconds || 0) - (a.at?.seconds || 0));
                     if(currentTab === 'history') renderData();
@@ -192,7 +199,7 @@
                 <thead><tr class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                     <th class="px-4 py-2">ID</th>
                     <th class="px-4 py-2">รายการ</th>
-                    <th class="px-4 py-2">สถานะ/รายละเอียด</th>
+                    <th class="px-4 py-2">สถานะ</th>
                     <th class="px-4 py-2 text-right">ดำเนินการ</th>
                 </tr></thead><tbody class="divide-y divide-slate-50">`;
 
@@ -219,7 +226,7 @@
                             <div class="text-[9px] text-slate-400 uppercase tracking-tighter">ผู้ยืม: ${b.borrower}</div>
                         </td>
                         <td class="px-4 py-4">
-                            <div class="text-[10px] font-bold text-orange-500"><i class="fa-solid fa-calendar mr-1"></i> ${new Date(b.ts?.seconds * 1000).toLocaleDateString()}</div>
+                            <div class="text-[10px] font-bold text-orange-500"><i class="fa-solid fa-calendar mr-1"></i> ยืมเมื่อ: ${new Date(b.ts?.seconds * 1000).toLocaleDateString()}</div>
                             <div class="text-[9px] text-slate-400 mt-1">โทร: ${b.phone || '-'}</div>
                         </td>
                         <td class="px-4 py-4 text-right">
@@ -232,9 +239,9 @@
                     <tr class="bg-rose-50/20">
                         <td class="px-4 py-4 font-mono text-[10px] text-slate-400">#${b.id}</td>
                         <td class="px-4 py-4 font-bold text-slate-700 text-xs">${b.title}</td>
-                        <td class="px-4 py-4"><span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-tight">แจ้งหาย / ชำรุด</span></td>
+                        <td class="px-4 py-4"><span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">หาย</span></td>
                         <td class="px-4 py-4 text-right">
-                             <button onclick="openModal('edit', '${b.id}')" class="px-3 py-1 border border-rose-200 text-rose-500 rounded-lg text-[10px] font-bold">แก้ไขสถานะ</button>
+                             <button onclick="openModal('edit', '${b.id}')" class="px-3 py-1 border border-rose-200 text-rose-500 rounded-lg text-[10px] font-bold">ปรับสถานะ</button>
                         </td>
                     </tr>`).join('');
             } else if (currentTab === 'history') {
@@ -253,9 +260,9 @@
         };
 
         function getStatusBadge(b) {
-            if(b.status === 'borrowed') return `<span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">ยืมโดย ${b.borrower}</span>`;
-            if(b.status === 'lost') return `<span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">แจ้งหาย</span>`;
-            return `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">พร้อมยืม</span>`;
+            if(b.status === 'borrowed') return `<span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">ถูกยืม</span>`;
+            if(b.status === 'lost') return `<span class="bg-rose-100 text-rose-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">หาย</span>`;
+            return `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tight">มีอยู่</span>`;
         }
 
         window.switchTab = (t) => {
@@ -263,8 +270,8 @@
             ['all', 'borrows', 'lost', 'history'].forEach(tab => {
                 const btn = document.getElementById(`tab-${tab}`);
                 btn.className = tab === t 
-                    ? 'px-6 py-4 text-xs font-bold whitespace-nowrap tab-active transition-all'
-                    : 'px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all';
+                    ? 'flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap tab-active transition-all'
+                    : 'flex items-center gap-2 px-6 py-4 text-xs font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all';
             });
             renderData();
         };
@@ -275,7 +282,6 @@
             document.getElementById('stat-borrowed').innerText = books.filter(b => b.status === 'borrowed').length;
             document.getElementById('stat-lost').innerText = books.filter(b => b.status === 'lost').length;
             
-            // Notification Dot
             const overdue = books.filter(b => {
                 if(b.status !== 'borrowed' || !b.ts) return false;
                 const d = new Date(b.ts.seconds * 1000);
