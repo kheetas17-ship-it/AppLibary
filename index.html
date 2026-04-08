@@ -3,94 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบห้องสมุด Cloud - museumapp-c49a8</title>
+    <title>ระบบห้องสมุดอัจฉริยะ V3 - museumapp-c49a8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; }
-        .tab-active { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 600; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        body { font-family: 'Prompt', sans-serif; background-color: #f8fafc; }
+        .tab-active { border-bottom: 3px solid #6366f1; color: #6366f1; font-weight: 600; }
+        .loading-overlay { position: fixed; inset: 0; background: white; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .bg-tag-red { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .bg-tag-blue { background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .bg-tag-green { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .bg-tag-yellow { background-color: #fef9c3; color: #854d0e; border: 1px solid #fef08a; }
+        .bg-tag-purple { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
+        .overdue-pulse { animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { background-color: #fee2e2; } 50% { background-color: #fca5a5; } 100% { background-color: #fee2e2; } }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <!-- Loading Screen -->
     <div id="loading" class="loading-overlay">
         <div class="text-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p class="text-slate-500">กำลังเชื่อมต่อฐานข้อมูล...</p>
+            <p class="text-slate-500">กำลังเปิดระบบห้องสมุด...</p>
         </div>
     </div>
 
     <div id="app-content" class="hidden min-h-screen">
-        <!-- Top Navigation -->
-        <nav class="bg-indigo-700 text-white shadow-lg sticky top-0 z-40">
+        <nav class="bg-slate-900 text-white shadow-xl sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <div class="flex items-center gap-3">
-                        <i class="fa-solid fa-book-open-reader text-2xl"></i>
-                        <span class="text-lg font-bold tracking-tight">Library Hub</span>
+                        <i class="fa-solid fa-book-open-reader text-indigo-400 text-2xl"></i>
+                        <span class="text-lg font-bold">Library Management System</span>
                     </div>
-                    <div class="text-xs opacity-80 bg-indigo-800 px-3 py-1 rounded-full border border-indigo-500/30">
-                        <i class="fa-solid fa-circle text-emerald-400 mr-1 animate-pulse"></i> museumapp-c49a8
+                    <div class="hidden sm:block text-xs text-slate-400">
+                        Project ID: <span class="text-indigo-300">museumapp-c49a8</span>
                     </div>
                 </div>
             </div>
         </nav>
 
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <!-- Summary Stats -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <p class="text-slate-400 text-xs uppercase font-semibold">หนังสือทั้งหมด</p>
-                    <h3 class="text-3xl font-bold mt-1" id="stat-total">0</h3>
+            <!-- Stats -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                    <p class="text-slate-400 text-[10px] uppercase font-bold tracking-wider">หนังสือทั้งหมด</p>
+                    <h3 class="text-2xl font-black mt-1" id="stat-total">0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
-                    <p class="text-emerald-500 text-xs uppercase font-semibold">พร้อมยืม</p>
-                    <h3 class="text-3xl font-bold mt-1" id="stat-available">0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-emerald-500">
+                    <p class="text-emerald-500 text-[10px] uppercase font-bold tracking-wider">ว่างพร้อมยืม</p>
+                    <h3 class="text-2xl font-black mt-1" id="stat-available">0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-orange-500">
-                    <p class="text-orange-500 text-xs uppercase font-semibold">กำลังยืม</p>
-                    <h3 class="text-3xl font-bold mt-1" id="stat-borrowed">0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-orange-500">
+                    <p class="text-orange-500 text-[10px] uppercase font-bold tracking-wider">กำลังถูกยืม</p>
+                    <h3 class="text-2xl font-black mt-1" id="stat-borrowed">0</h3>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-indigo-500">
-                    <p class="text-indigo-500 text-xs uppercase font-semibold">ทำรายการวันนี้</p>
-                    <h3 class="text-3xl font-bold mt-1" id="stat-today">0</h3>
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 border-l-4 border-red-500">
+                    <p class="text-red-500 text-[10px] uppercase font-bold tracking-wider">เกินกำหนดคืน</p>
+                    <h3 class="text-2xl font-black mt-1 text-red-600" id="stat-overdue">0</h3>
                 </div>
             </div>
 
-            <!-- Tab Navigation -->
+            <!-- Tab Menu -->
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div class="flex border-b border-slate-100 overflow-x-auto bg-slate-50/50">
-                    <button onclick="switchTab('inventory')" id="tab-inventory" class="px-6 py-4 text-sm transition-all tab-active">
-                        <i class="fa-solid fa-boxes-stacked mr-2"></i>รายการหนังสือ
+                <div class="flex border-b border-slate-100 bg-slate-50/50 no-scrollbar overflow-x-auto">
+                    <button onclick="switchTab('inventory')" id="tab-inventory" class="px-6 py-4 text-sm whitespace-nowrap tab-active">
+                        <i class="fa-solid fa-boxes-stacked mr-2"></i>คลังหนังสือ
                     </button>
-                    <button onclick="switchTab('active-borrows')" id="tab-active-borrows" class="px-6 py-4 text-sm transition-all text-slate-500">
-                        <i class="fa-solid fa-hand-holding-hand mr-2"></i>หนังสือที่ถูกยืม
+                    <button onclick="switchTab('active-borrows')" id="tab-active-borrows" class="px-6 py-4 text-sm whitespace-nowrap text-slate-500 relative">
+                        <i class="fa-solid fa-user-clock mr-2"></i>รายชื่อผู้ยืม
+                        <span id="overdue-badge" class="hidden absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
                     </button>
-                    <button onclick="switchTab('history')" id="tab-history" class="px-6 py-4 text-sm transition-all text-slate-500">
-                        <i class="fa-solid fa-clock-rotate-left mr-2"></i>ประวัติการยืม-คืน
+                    <button onclick="switchTab('history')" id="tab-history" class="px-6 py-4 text-sm whitespace-nowrap text-slate-500">
+                        <i class="fa-solid fa-clipboard-list mr-2"></i>ประวัติรายการ
                     </button>
                 </div>
 
-                <!-- Tab: Inventory -->
-                <div id="view-inventory" class="p-0">
-                    <div class="p-4 flex justify-between items-center bg-white border-b border-slate-50">
-                        <h4 class="font-bold text-slate-700">คลังหนังสือทั้งหมด</h4>
-                        <button onclick="window.showAddModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition-all">
-                            <i class="fa-solid fa-plus mr-1"></i> เพิ่มหนังสือ
+                <!-- View: Inventory -->
+                <div id="view-inventory" class="animate-fadeIn">
+                    <div class="p-4 flex flex-col sm:flex-row justify-between gap-4 border-b border-slate-50">
+                        <div class="relative flex-1 max-w-md">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" id="searchInput" oninput="renderInventory()" placeholder="ค้นหารหัส หรือชื่อหนังสือ..." class="w-full pl-10 pr-4 py-2 bg-slate-100 border-transparent rounded-lg text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                        </div>
+                        <button onclick="window.showBookModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95">
+                            <i class="fa-solid fa-plus mr-2"></i>เพิ่มหนังสือ
                         </button>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] tracking-widest">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase font-bold">
                                 <tr>
-                                    <th class="px-6 py-3">รหัส</th>
-                                    <th class="px-6 py-3">ชื่อหนังสือ / ผู้แต่ง</th>
-                                    <th class="px-6 py-3 text-center">สถานะ</th>
-                                    <th class="px-6 py-3 text-right">จัดการ</th>
+                                    <th class="px-6 py-4">ID / สี</th>
+                                    <th class="px-6 py-4">ข้อมูลหนังสือ</th>
+                                    <th class="px-6 py-4 text-center">สถานะ</th>
+                                    <th class="px-6 py-4 text-right">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody id="inventoryTable" class="divide-y divide-slate-100"></tbody>
@@ -98,19 +108,20 @@
                     </div>
                 </div>
 
-                <!-- Tab: Active Borrows -->
-                <div id="view-active-borrows" class="hidden p-0">
-                    <div class="p-4 bg-orange-50/50 border-b border-orange-100">
-                        <h4 class="font-bold text-orange-800">รายชื่อหนังสือที่ยังไม่ส่งคืน</h4>
+                <!-- View: Active Borrows -->
+                <div id="view-active-borrows" class="hidden">
+                    <div class="p-4 bg-orange-50/50 border-b border-orange-100 flex items-center justify-between">
+                        <h4 class="font-bold text-orange-800 tracking-tight">รายการรอส่งคืน (แจ้งเตือนยืมเกิน 7 วันอัตโนมัติ)</h4>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-400 uppercase text-[10px]">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase">
                                 <tr>
-                                    <th class="px-6 py-3">เล่มที่ยืม</th>
-                                    <th class="px-6 py-3">ผู้ยืม / เบอร์โทร</th>
-                                    <th class="px-6 py-3">วันที่ยืม</th>
-                                    <th class="px-6 py-3 text-right">ดำเนินการ</th>
+                                    <th class="px-6 py-4">หนังสือ</th>
+                                    <th class="px-6 py-4">ผู้ยืม</th>
+                                    <th class="px-6 py-4">วันที่ยืม</th>
+                                    <th class="px-6 py-4">สถานะเวลา</th>
+                                    <th class="px-6 py-4 text-right">คืนของ</th>
                                 </tr>
                             </thead>
                             <tbody id="activeBorrowsTable" class="divide-y divide-slate-100"></tbody>
@@ -118,20 +129,19 @@
                     </div>
                 </div>
 
-                <!-- Tab: History -->
-                <div id="view-history" class="hidden p-0">
-                    <div class="p-4 bg-indigo-50/50 border-b border-indigo-100 flex justify-between items-center">
-                        <h4 class="font-bold text-indigo-800">บันทึกกิจกรรมล่าสุด</h4>
-                        <span class="text-[10px] text-indigo-400 bg-white px-2 py-1 rounded-md border border-indigo-100">เรียงตามเวลาล่าสุด</span>
+                <!-- View: History -->
+                <div id="view-history" class="hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-100">
+                        <h4 class="font-bold text-slate-700">ประวัติกิจกรรมย้อนหลัง</h4>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
-                            <thead class="bg-slate-50 text-slate-400 uppercase text-[10px]">
+                            <thead class="bg-slate-50 text-slate-400 text-[10px] uppercase">
                                 <tr>
-                                    <th class="px-6 py-3">กิจกรรม</th>
-                                    <th class="px-6 py-3">รหัส/ชื่อหนังสือ</th>
-                                    <th class="px-6 py-3">ผู้เกี่ยวข้อง</th>
-                                    <th class="px-6 py-3 text-right">วัน-เวลา</th>
+                                    <th class="px-6 py-4">กิจกรรม</th>
+                                    <th class="px-6 py-4">ชื่อหนังสือ</th>
+                                    <th class="px-6 py-4">ผู้เกี่ยวข้อง</th>
+                                    <th class="px-6 py-4 text-right">วัน-เวลา</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTable" class="divide-y divide-slate-100"></tbody>
@@ -142,42 +152,57 @@
         </main>
     </div>
 
-    <!-- Modals (Add, Borrow) - Same logic as previous but with history integration -->
+    <!-- Modal: Add/Edit Book -->
     <div id="bookModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <h3 class="text-xl font-bold mb-4">เพิ่มหนังสือใหม่</h3>
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 border-t-8 border-indigo-600" id="bookModalContent">
+            <h3 id="modalTitle" class="text-xl font-bold mb-6">เพิ่มหนังสือใหม่</h3>
+            <input type="hidden" id="editBookMode" value="false">
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">รหัสหนังสือ</label>
-                    <input type="text" id="m_id" class="w-full px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500" placeholder="เช่น B-001">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">รหัสหนังสือ (ID)</label>
+                    <input type="text" id="m_id" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="B001">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">ชื่อหนังสือ</label>
-                    <input type="text" id="m_title" class="w-full px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">ชื่อหนังสือ</label>
+                    <input type="text" id="m_title" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="ระบุชื่อหนังสือ">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">ผู้แต่ง</label>
-                    <input type="text" id="m_author" class="w-full px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-500">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">ชื่อผู้แต่ง</label>
+                    <input type="text" id="m_author" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" placeholder="ระบุชื่อผู้แต่ง">
                 </div>
-                <div class="flex gap-3 pt-4">
-                    <button onclick="document.getElementById('bookModal').classList.add('hidden')" class="flex-1 py-2 text-slate-500 font-semibold">ยกเลิก</button>
-                    <button onclick="window.saveBook()" class="flex-1 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-md hover:bg-indigo-700">ยืนยัน</button>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-2">สีหมวดหมู่</label>
+                    <div class="flex gap-3">
+                        <label class="cursor-pointer"><input type="radio" name="m_color" value="blue" checked class="hidden peer"><div class="w-8 h-8 rounded-full bg-blue-500 ring-offset-2 peer-checked:ring-2 ring-blue-500 transition-all"></div></label>
+                        <label class="cursor-pointer"><input type="radio" name="m_color" value="red" class="hidden peer"><div class="w-8 h-8 rounded-full bg-red-500 ring-offset-2 peer-checked:ring-2 ring-red-500 transition-all"></div></label>
+                        <label class="cursor-pointer"><input type="radio" name="m_color" value="green" class="hidden peer"><div class="w-8 h-8 rounded-full bg-green-500 ring-offset-2 peer-checked:ring-2 ring-green-500 transition-all"></div></label>
+                        <label class="cursor-pointer"><input type="radio" name="m_color" value="yellow" class="hidden peer"><div class="w-8 h-8 rounded-full bg-yellow-400 ring-offset-2 peer-checked:ring-2 ring-yellow-400 transition-all"></div></label>
+                        <label class="cursor-pointer"><input type="radio" name="m_color" value="purple" class="hidden peer"><div class="w-8 h-8 rounded-full bg-purple-500 ring-offset-2 peer-checked:ring-2 ring-purple-500 transition-all"></div></label>
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-6">
+                    <button onclick="window.closeModals()" class="flex-1 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg transition-all">ยกเลิก</button>
+                    <button onclick="window.saveBook()" class="flex-2 px-8 py-2 bg-indigo-600 text-white rounded-lg font-bold shadow-lg hover:bg-indigo-700 transition-all">บันทึกข้อมูล</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Modal: Borrow -->
     <div id="borrowModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 border-t-4 border-orange-500">
-            <h3 class="text-xl font-bold mb-4 text-orange-600">ลงทะเบียนการยืม</h3>
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl p-6 border-t-8 border-orange-500" id="borrowModalContent">
+            <h3 class="text-xl font-black mb-1 text-orange-600">ลงทะเบียนยืม</h3>
+            <p class="text-[10px] text-slate-400 mb-6 uppercase tracking-widest font-bold">กำหนดส่งคืนภายใน 7 วัน</p>
             <input type="hidden" id="borrowTargetId">
             <div class="space-y-4">
-                <div id="borrowTargetTitle" class="bg-orange-50 p-3 rounded-lg text-xs text-orange-700 font-medium mb-2 italic"></div>
-                <input type="text" id="b_name" placeholder="ชื่อผู้ยืม" class="w-full px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500">
-                <input type="tel" id="b_phone" placeholder="เบอร์โทรศัพท์" class="w-full px-4 py-2 border rounded-xl outline-none focus:ring-2 focus:ring-orange-500">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div id="targetBookName" class="font-bold text-slate-700 text-sm"></div>
+                </div>
+                <input type="text" id="b_name" placeholder="ชื่อ-นามสกุล ผู้ยืม" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all">
+                <input type="tel" id="b_phone" placeholder="เบอร์โทรศัพท์" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-orange-500 transition-all">
                 <div class="flex gap-3 pt-4">
-                    <button onclick="document.getElementById('borrowModal').classList.add('hidden')" class="flex-1 py-2 text-slate-500 font-semibold">ปิด</button>
-                    <button onclick="window.confirmBorrow()" class="flex-1 py-2 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600">ยืมหนังสือ</button>
+                    <button onclick="window.closeModals()" class="flex-1 py-2 text-slate-400 font-bold">ยกเลิก</button>
+                    <button onclick="window.confirmBorrow()" class="flex-2 px-8 py-2 bg-orange-500 text-white rounded-lg font-bold shadow-lg hover:bg-orange-600 transition-all">ยืนยันการยืม</button>
                 </div>
             </div>
         </div>
@@ -186,9 +211,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, addDoc, serverTimestamp, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- Firebase Configuration ---
         const firebaseConfig = {
             apiKey: "AIzaSyDnawFy5prH0bPLNbJGH4uCB9Qnu2olNbo",
             authDomain: "museumapp-c49a8.firebaseapp.com",
@@ -197,7 +221,7 @@
             messagingSenderId: "246960041791",
             appId: "1:246960041791:web:78911e60ff746a97ab6d8a"
         };
-        const appId = "museum-lib-v2";
+        const appId = "museum-lib-v3";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -206,182 +230,209 @@
         let books = [];
         let logs = [];
 
-        // Auth & Initial Listeners
-        signInAnonymously(auth).then(() => {
-            document.getElementById('loading').classList.add('hidden');
-            document.getElementById('app-content').classList.remove('hidden');
-            setupListeners();
-        }).catch(err => {
-            Swal.fire("Error", "กรุณาเปิด Anonymous Auth ใน Firebase ด้วยครับ", "error");
-        });
+        const startApp = async () => {
+            try {
+                await signInAnonymously(auth);
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('app-content').classList.remove('hidden');
+                setupRealtimeListeners();
+            } catch (err) {
+                Swal.fire("Error", "เชื่อมต่อฐานข้อมูลล้มเหลว", "error");
+            }
+        };
+        startApp();
 
-        function setupListeners() {
-            // ฟังข้อมูลหนังสือ
-            const booksRef = collection(db, 'artifacts', appId, 'public', 'data', 'books');
-            onSnapshot(booksRef, (snap) => {
+        function setupRealtimeListeners() {
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'books'), (snap) => {
                 books = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderAll();
+                renderInventory();
+                renderActiveBorrows();
+                updateStats();
             });
 
-            // ฟังข้อมูลประวัติ (Logs)
-            const logsRef = collection(db, 'artifacts', appId, 'public', 'data', 'history');
-            onSnapshot(logsRef, (snap) => {
-                // ดึงข้อมูลประวัติและเรียงใน JavaScript (Rule 2: No complex queries)
+            onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'history'), (snap) => {
                 logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 logs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
                 renderHistory();
-                updateStats();
             });
-        }
-
-        function renderAll() {
-            renderInventory();
-            renderActiveBorrows();
-            updateStats();
-        }
-
-        // --- Render Functions ---
-
-        function renderInventory() {
-            const tbody = document.getElementById('inventoryTable');
-            if(books.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">คลังว่างเปล่า...</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = books.map(book => `
-                <tr class="hover:bg-slate-50">
-                    <td class="px-6 py-4 font-mono text-[10px] text-slate-400">${book.id}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-slate-700">${book.title}</div>
-                        <div class="text-[11px] text-slate-400">${book.author}</div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        ${book.status === 'available' 
-                            ? '<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-bold">ว่าง</span>'
-                            : '<span class="px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 text-[10px] font-bold">ไม่ว่าง</span>'
-                        }
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        ${book.status === 'available' 
-                            ? `<button onclick="window.openBorrowModal('${book.id}', '${book.title}')" class="text-indigo-600 hover:text-indigo-800 font-bold">ยืม</button>`
-                            : `<button onclick="window.returnBook('${book.id}')" class="text-emerald-600 hover:text-emerald-800 font-bold">คืน</button>`
-                        }
-                        <button onclick="window.deleteBook('${book.id}')" class="ml-3 text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderActiveBorrows() {
-            const tbody = document.getElementById('activeBorrowsTable');
-            const borrowedBooks = books.filter(b => b.status === 'borrowed');
-            if(borrowedBooks.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">ไม่มีหนังสือค้างส่งในระบบ</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = borrowedBooks.map(book => `
-                <tr class="bg-orange-50/20">
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-slate-700">${book.title}</div>
-                        <div class="text-[10px] text-slate-400">ID: ${book.id}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-slate-700 font-medium">${book.borrower}</div>
-                        <div class="text-[11px] text-slate-400"><i class="fa-solid fa-phone mr-1"></i>${book.phone}</div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="text-xs text-slate-500">${book.date}</div>
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="window.returnBook('${book.id}')" class="bg-white border border-emerald-500 text-emerald-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-emerald-50 transition-all">คืนหนังสือ</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function renderHistory() {
-            const tbody = document.getElementById('historyTable');
-            if(logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 italic">ยังไม่มีประวัติกิจกรรม</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = logs.slice(0, 50).map(log => {
-                const timeStr = log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString('th-TH') : '...';
-                const isReturn = log.action === 'คืนหนังสือ';
-                return `
-                    <tr class="text-[11px]">
-                        <td class="px-6 py-3">
-                            <span class="${isReturn ? 'text-emerald-600 bg-emerald-50' : 'text-orange-600 bg-orange-50'} px-2 py-0.5 rounded font-bold">${log.action}</span>
-                        </td>
-                        <td class="px-6 py-3">
-                            <span class="text-slate-600 font-medium">${log.bookTitle}</span>
-                        </td>
-                        <td class="px-6 py-3 text-slate-500">
-                            ${log.borrower}
-                        </td>
-                        <td class="px-6 py-3 text-right text-slate-400">
-                            ${timeStr}
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function updateStats() {
-            const total = books.length;
-            const borrowed = books.filter(b => b.status === 'borrowed').length;
-            const available = total - borrowed;
-            
-            // กิจกรรมวันนี้ (นับเฉพาะประวัติที่มีวันที่ตรงกับวันนี้)
-            const todayStr = new Date().toLocaleDateString('th-TH');
-            const todayCount = logs.filter(l => {
-                const lDate = l.timestamp ? new Date(l.timestamp.seconds * 1000).toLocaleDateString('th-TH') : '';
-                return lDate === todayStr;
-            }).length;
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-available').innerText = available;
-            document.getElementById('stat-borrowed').innerText = borrowed;
-            document.getElementById('stat-today').innerText = todayCount;
         }
 
         // --- Core Functions ---
 
-        window.switchTab = (target) => {
-            const views = ['inventory', 'active-borrows', 'history'];
-            views.forEach(v => {
-                document.getElementById(`view-${v}`).classList.add('hidden');
-                document.getElementById(`tab-${v}`).classList.remove('tab-active');
-                document.getElementById(`tab-${v}`).classList.add('text-slate-500');
-            });
-            document.getElementById(`view-${target}`).classList.remove('hidden');
-            document.getElementById(`tab-${target}`).classList.add('tab-active');
-            document.getElementById(`tab-${target}`).classList.remove('text-slate-500');
+        window.renderInventory = () => {
+            const tbody = document.getElementById('inventoryTable');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = books.filter(b => b.id.toLowerCase().includes(search) || b.title.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">ไม่พบข้อมูลหนังสือ</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(book => {
+                const colorClass = `bg-tag-${book.color || 'blue'}`;
+                return `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-3 h-3 rounded-full bg-${book.color === 'yellow' ? 'yellow-400' : (book.color || 'blue')+'-500'}"></div>
+                            <span class="font-mono text-[11px] text-slate-500">${book.id}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800">${book.title}</div>
+                        <div class="text-[11px] text-slate-400">${book.author || 'ไม่ระบุผู้แต่ง'}</div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        ${book.status === 'available' 
+                            ? '<span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">ว่าง</span>'
+                            : '<span class="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold">ถูกยืม</span>'}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end gap-1">
+                            ${book.status === 'available' 
+                                ? `<button onclick="window.openBorrowModal('${book.id}', '${book.title}')" class="px-3 py-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded text-xs font-bold transition-all">ยืม</button>`
+                                : `<button onclick="window.returnBook('${book.id}')" class="px-3 py-1 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded text-xs font-bold transition-all">คืน</button>`}
+                            <button onclick="window.showBookModal('${book.id}')" class="w-8 h-8 text-slate-300 hover:text-blue-500 hover:bg-blue-50 rounded transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="window.deleteBook('${book.id}')" class="w-8 h-8 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
         };
 
-        window.showAddModal = () => {
-            document.getElementById('m_id').value = "";
-            document.getElementById('m_title').value = "";
-            document.getElementById('m_author').value = "";
-            document.getElementById('bookModal').classList.remove('hidden');
+        window.renderActiveBorrows = () => {
+            const tbody = document.getElementById('activeBorrowsTable');
+            const borrowed = books.filter(b => b.status === 'borrowed');
+            
+            if (borrowed.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-12 text-center text-slate-300 italic">ไม่มีหนังสือค้างส่งคืน</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = borrowed.map(book => {
+                // คำนวณวันเกินกำหนด (7 วัน)
+                const borrowDate = book.timestamp ? new Date(book.timestamp.seconds * 1000) : new Date();
+                const now = new Date();
+                const diffTime = Math.abs(now - borrowDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const isOverdue = diffDays > 7;
+
+                return `
+                <tr class="${isOverdue ? 'overdue-pulse' : ''}">
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-800">${book.title}</div>
+                        <div class="text-[10px] font-mono text-slate-400">ID: ${book.id}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-700">${book.borrower}</div>
+                        <div class="text-[11px] text-slate-500"><i class="fa-solid fa-phone mr-1"></i>${book.phone}</div>
+                    </td>
+                    <td class="px-6 py-4 text-slate-500 text-xs">${book.date || '-'}</td>
+                    <td class="px-6 py-4">
+                        ${isOverdue 
+                            ? `<div class="flex items-center gap-1 text-red-600 font-black text-[10px] animate-bounce"><i class="fa-solid fa-triangle-exclamation"></i> ยืมเกิน 7 วัน! (${diffDays} วัน)</div>`
+                            : `<div class="text-emerald-600 text-[10px] font-bold">ภายในกำหนด (${diffDays} วัน)</div>`
+                        }
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="window.returnBook('${book.id}')" class="bg-white border border-emerald-500 text-emerald-600 px-4 py-1 rounded-lg text-xs font-bold hover:bg-emerald-500 hover:text-white transition-all shadow-sm">ส่งคืน</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        };
+
+        window.renderHistory = () => {
+            const tbody = document.getElementById('historyTable');
+            if (logs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-12 text-center text-slate-300 italic">ไม่มีประวัติรายการ</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = logs.slice(0, 50).map(log => `
+                <tr class="text-xs">
+                    <td class="px-6 py-4 font-bold ${log.action === 'คืนหนังสือ' ? 'text-emerald-600' : 'text-orange-600'}">${log.action}</td>
+                    <td class="px-6 py-4 text-slate-600">${log.bookTitle}</td>
+                    <td class="px-6 py-4 text-slate-500 italic">${log.borrower || '-'}</td>
+                    <td class="px-6 py-4 text-right font-mono text-slate-400">${log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString('th-TH') : '...'}</td>
+                </tr>`).join('');
+        };
+
+        window.updateStats = () => {
+            const total = books.length;
+            const borrowed = books.filter(b => b.status === 'borrowed').length;
+            const available = total - borrowed;
+            
+            let overdue = 0;
+            const now = new Date();
+            books.forEach(b => {
+                if(b.status === 'borrowed' && b.timestamp) {
+                    const diffDays = Math.ceil(Math.abs(now - new Date(b.timestamp.seconds * 1000)) / (1000 * 60 * 60 * 24));
+                    if(diffDays > 7) overdue++;
+                }
+            });
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-available').innerText = available;
+            document.getElementById('stat-borrowed').innerText = borrowed;
+            document.getElementById('stat-overdue').innerText = overdue;
+            document.getElementById('overdue-badge').classList.toggle('hidden', overdue === 0);
+        };
+
+        // --- Event Handlers ---
+
+        window.showBookModal = (id = null) => {
+            const isEdit = !!id;
+            document.getElementById('editBookMode').value = isEdit ? id : "false";
+            document.getElementById('modalTitle').innerText = isEdit ? "แก้ไขข้อมูลหนังสือ" : "เพิ่มหนังสือใหม่";
+            document.getElementById('m_id').disabled = isEdit;
+
+            if (isEdit) {
+                const book = books.find(b => b.id === id);
+                document.getElementById('m_id').value = book.id;
+                document.getElementById('m_title').value = book.title;
+                document.getElementById('m_author').value = book.author;
+                document.querySelector(`input[name="m_color"][value="${book.color || 'blue'}"]`).checked = true;
+            } else {
+                document.getElementById('m_id').value = "";
+                document.getElementById('m_title').value = "";
+                document.getElementById('m_author').value = "";
+                document.querySelector('input[name="m_color"][value="blue"]').checked = true;
+            }
+
+            const modal = document.getElementById('bookModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => document.getElementById('bookModalContent').classList.replace('opacity-0', 'opacity-100'), 10);
         };
 
         window.saveBook = async () => {
             const id = document.getElementById('m_id').value.trim();
             const title = document.getElementById('m_title').value.trim();
             const author = document.getElementById('m_author').value.trim();
-            if(!id || !title) return;
+            const color = document.querySelector('input[name="m_color"]:checked').value;
+            const isEdit = document.getElementById('editBookMode').value !== "false";
 
-            await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id), {
-                title, author, status: 'available', borrower: '', phone: '', date: ''
-            });
-            document.getElementById('bookModal').classList.add('hidden');
-            Swal.fire({ icon: 'success', title: 'เพิ่มสำเร็จ', showConfirmButton: false, timer: 1000 });
+            if (!id || !title) return Swal.fire("ลืมกรอกข้อมูล", "กรุณาใส่รหัสและชื่อหนังสือ", "warning");
+
+            try {
+                const bookRef = doc(db, 'artifacts', appId, 'public', 'data', 'books', id);
+                if (isEdit) {
+                    await updateDoc(bookRef, { title, author, color });
+                } else {
+                    await setDoc(bookRef, { 
+                        title, author, color, status: 'available', 
+                        borrower: '', phone: '', date: '', createdAt: serverTimestamp() 
+                    });
+                }
+                window.closeModals();
+                Swal.fire({ icon: 'success', title: 'บันทึกเรียบร้อย', showConfirmButton: false, timer: 1000 });
+            } catch (err) {
+                Swal.fire("Error", "ไม่สามารถบันทึกข้อมูลได้", "error");
+            }
         };
 
         window.openBorrowModal = (id, title) => {
             document.getElementById('borrowTargetId').value = id;
-            document.getElementById('borrowTargetTitle').innerText = "กำลังยืม: " + title;
+            document.getElementById('targetBookName').innerText = title;
             document.getElementById('b_name').value = "";
             document.getElementById('b_phone').value = "";
             document.getElementById('borrowModal').classList.remove('hidden');
@@ -391,54 +442,64 @@
             const id = document.getElementById('borrowTargetId').value;
             const name = document.getElementById('b_name').value.trim();
             const phone = document.getElementById('b_phone').value.trim();
-            if(!name || !phone) return;
+            if (!name || !phone) return Swal.fire("กรอกข้อมูลไม่ครบ", "กรุณาระบุชื่อผู้ยืมและเบอร์โทร", "warning");
 
             const book = books.find(b => b.id === id);
-            
-            // อัปเดตสถานะหนังสือ
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id), {
-                status: 'borrowed', borrower: name, phone: phone, date: new Date().toLocaleDateString('th-TH')
-            });
-
-            // บันทึกประวัติ (History Log)
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                bookId: id,
-                bookTitle: book.title,
-                borrower: name,
-                action: 'ยืมหนังสือ',
-                timestamp: serverTimestamp()
-            });
-
-            document.getElementById('borrowModal').classList.add('hidden');
-            Swal.fire({ icon: 'success', title: 'ลงทะเบียนการยืมแล้ว', showConfirmButton: false, timer: 1000 });
+            try {
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id), {
+                    status: 'borrowed', borrower: name, phone: phone, 
+                    date: new Date().toLocaleDateString('th-TH'),
+                    timestamp: serverTimestamp() // บันทึกเวลาเพื่อคำนวณ 7 วัน
+                });
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                    bookId: id, bookTitle: book.title, borrower: name, action: 'ยืมหนังสือ', timestamp: serverTimestamp()
+                });
+                window.closeModals();
+                Swal.fire({ icon: 'success', title: 'ยืมสำเร็จ!', text: 'กำหนดส่งคืนภายใน 7 วัน', showConfirmButton: true });
+            } catch (err) {
+                Swal.fire("Error", "ยืมไม่สำเร็จ", "error");
+            }
         };
 
         window.returnBook = async (id) => {
             const book = books.find(b => b.id === id);
-            const borrowerName = book.borrower;
-
-            // อัปเดตสถานะหนังสือ
-            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id), {
-                status: 'available', borrower: '', phone: '', date: ''
+            const confirm = await Swal.fire({
+                title: 'ยืนยันการรับคืน?',
+                text: `รับคืนเล่ม "${book.title}"`,
+                showCancelButton: true,
+                confirmButtonText: 'ยืนยัน',
+                cancelButtonText: 'ยังไม่ได้รับ'
             });
 
-            // บันทึกประวัติ (History Log)
-            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
-                bookId: id,
-                bookTitle: book.title,
-                borrower: borrowerName,
-                action: 'คืนหนังสือ',
-                timestamp: serverTimestamp()
-            });
-
-            Swal.fire({ icon: 'success', title: 'รับคืนหนังสือเรียบร้อย', showConfirmButton: false, timer: 1000 });
+            if (confirm.isConfirmed) {
+                const prevUser = book.borrower;
+                await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id), {
+                    status: 'available', borrower: '', phone: '', date: '', timestamp: null
+                });
+                await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'history'), {
+                    bookId: id, bookTitle: book.title, borrower: prevUser, action: 'คืนหนังสือ', timestamp: serverTimestamp()
+                });
+                Swal.fire({ icon: 'success', title: 'คืนสำเร็จ', showConfirmButton: false, timer: 1000 });
+            }
         };
 
         window.deleteBook = async (id) => {
-            const confirm = await Swal.fire({ title: 'ลบหนังสือ?', text: 'ข้อมูลหนังสือจะหายไปถาวร', icon: 'warning', showCancelButton: true });
-            if(confirm.isConfirmed) {
-                await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id));
-            }
+            const res = await Swal.fire({ title: 'ลบหนังสือ?', text: 'ลบแล้วกู้คืนไม่ได้', icon: 'warning', showCancelButton: true });
+            if (res.isConfirmed) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'books', id));
+        };
+
+        window.closeModals = () => {
+            document.querySelectorAll('.fixed').forEach(m => m.classList.add('hidden'));
+        };
+
+        window.switchTab = (target) => {
+            ['inventory', 'active-borrows', 'history'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+                document.getElementById(`tab-${v}`).classList.remove('tab-active');
+                document.getElementById(`tab-${v}`).classList.add('text-slate-500');
+            });
+            document.getElementById(`view-${target}`).classList.remove('hidden');
+            document.getElementById(`tab-${target}`).classList.add('tab-active');
         };
 
     </script>
