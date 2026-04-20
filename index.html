@@ -16,6 +16,8 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        /* ป้องกันข้อความใน Badge ตัดบรรทัด */
+        .status-badge { white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; min-width: 80px; }
     </style>
 </head>
 <body class="min-h-screen pb-16">
@@ -132,7 +134,7 @@
         </div>
     </div>
 
-    <!-- Borrow Modal (Updated) -->
+    <!-- Borrow Modal -->
     <div id="modal-borrow" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex items-center justify-center p-6">
         <div class="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative">
             <div class="text-center mb-6">
@@ -143,7 +145,6 @@
                 <p id="b-book-title" class="text-xs text-orange-500 font-bold uppercase mt-2 tracking-wide"></p>
             </div>
 
-            <!-- Borrow Policy Info -->
             <div class="bg-orange-50/50 rounded-2xl p-5 mb-6 border border-orange-100">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs font-bold text-orange-600 uppercase tracking-widest">ระยะเวลาการยืม</span>
@@ -211,12 +212,12 @@
             const search = document.getElementById('searchInput').value.toLowerCase();
             const container = document.getElementById('view-container');
             
-            let html = `<table class="w-full text-left border-separate border-spacing-y-2">
+            let html = `<table class="w-full text-left border-separate border-spacing-y-2 table-auto">
                 <thead><tr class="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                    <th class="px-6 py-4">ID</th>
+                    <th class="px-6 py-4 w-20">ID</th>
                     <th class="px-6 py-4">รายการ</th>
-                    <th class="px-6 py-4">สถานะ</th>
-                    <th class="px-6 py-4 text-right">ดำเนินการ</th>
+                    <th class="px-6 py-4 w-24">สถานะ</th>
+                    <th class="px-6 py-4 text-right w-40">ดำเนินการ</th>
                 </tr></thead><tbody class="divide-y divide-slate-50">`;
 
             if (currentTab === 'all') {
@@ -226,8 +227,8 @@
                         <td class="px-6 py-5 font-mono text-xs text-slate-400">#${b.id}</td>
                         <td class="px-6 py-5 font-bold text-slate-700 text-sm">${b.title}</td>
                         <td class="px-6 py-5">${getStatusBadge(b)}</td>
-                        <td class="px-6 py-5 text-right flex justify-end gap-2 opacity-80 group-hover:opacity-100">
-                            ${b.status === 'available' ? `<button onclick="borrowPrompt('${b.id}')" class="px-5 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all">ยืม</button>` : ''}
+                        <td class="px-6 py-5 text-right flex justify-end items-center gap-2 opacity-80 group-hover:opacity-100">
+                            ${b.status === 'available' ? `<button onclick="borrowPrompt('${b.id}')" class="px-5 py-2 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-600 hover:text-white transition-all whitespace-nowrap">ยืม</button>` : ''}
                             <button onclick="openModal('edit', '${b.id}')" class="p-3 text-slate-300 hover:text-indigo-500 hover:bg-white rounded-xl"><i class="fa-solid fa-pen text-base"></i></button>
                             <button onclick="deleteBook('${b.id}')" class="p-3 text-slate-300 hover:text-rose-500 hover:bg-white rounded-xl"><i class="fa-solid fa-trash text-base"></i></button>
                         </td>
@@ -247,13 +248,13 @@
                             <div class="text-[11px] text-slate-400 font-bold uppercase tracking-tight mt-1">ผู้ยืม: ${b.borrower}</div>
                         </td>
                         <td class="px-6 py-6">
-                            <div class="text-xs font-bold ${isOverdue ? 'text-rose-600' : 'text-orange-500'} flex items-center gap-2">
+                            <div class="text-xs font-bold ${isOverdue ? 'text-rose-600' : 'text-orange-500'} flex items-center gap-2 whitespace-nowrap">
                                 <i class="fa-solid fa-calendar-check"></i> กำหนดคืน: ${dueDate.toLocaleDateString('th-TH')}
                             </div>
-                            <div class="text-[11px] text-slate-400 mt-1.5 font-medium">เบอร์โทร: ${b.phone || '-'}</div>
+                            <div class="text-[11px] text-slate-400 mt-1.5 font-medium whitespace-nowrap">เบอร์โทร: ${b.phone || '-'}</div>
                         </td>
                         <td class="px-6 py-6 text-right">
-                            <button onclick="returnBook('${b.id}')" class="px-6 py-3 bg-emerald-500 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-100 hover:bg-emerald-600">คืนหนังสือ</button>
+                            <button onclick="returnBook('${b.id}')" class="px-6 py-3 bg-emerald-500 text-white rounded-2xl text-xs font-black shadow-lg shadow-emerald-100 hover:bg-emerald-600 whitespace-nowrap">คืนหนังสือ</button>
                         </td>
                     </tr>`}).join('');
             } else if (currentTab === 'lost') {
@@ -262,9 +263,9 @@
                     <tr class="bg-rose-50/20 rounded-2xl">
                         <td class="px-6 py-6 font-mono text-xs text-slate-400">#${b.id}</td>
                         <td class="px-6 py-6 font-bold text-slate-700 text-sm">${b.title}</td>
-                        <td class="px-6 py-6"><span class="bg-rose-100 text-rose-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">หาย</span></td>
+                        <td class="px-6 py-6">${getStatusBadge(b)}</td>
                         <td class="px-6 py-6 text-right">
-                             <button onclick="openModal('edit', '${b.id}')" class="px-4 py-2 border-2 border-rose-100 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-50 transition-all">ปรับปรุงสถานะ</button>
+                             <button onclick="openModal('edit', '${b.id}')" class="px-4 py-2 border-2 border-rose-100 text-rose-500 rounded-xl text-xs font-bold hover:bg-rose-50 transition-all whitespace-nowrap">ปรับปรุงสถานะ</button>
                         </td>
                     </tr>`).join('');
             } else if (currentTab === 'history') {
@@ -283,16 +284,17 @@
         };
 
         function getStatusBadge(b) {
-            if(b.status === 'borrowed') return `<span class="bg-orange-50 text-orange-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">ถูกยืม</span>`;
-            if(b.status === 'lost') return `<span class="bg-rose-100 text-rose-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">หาย</span>`;
-            return `<span class="bg-emerald-50 text-emerald-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">มีอยู่</span>`;
+            const common = "status-badge px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider whitespace-nowrap";
+            if(b.status === 'borrowed') return `<span class="bg-orange-50 text-orange-600 ${common}">ถูกยืม</span>`;
+            if(b.status === 'lost') return `<span class="bg-rose-100 text-rose-600 ${common}">หาย</span>`;
+            return `<span class="bg-emerald-50 text-emerald-600 ${common}">มีอยู่</span>`;
         }
 
         window.switchTab = (t) => {
             currentTab = t;
             ['all', 'borrows', 'lost', 'history'].forEach(tab => {
                 const btn = document.getElementById(`tab-${tab}`);
-                btn.className = tab === t 
+                if (btn) btn.className = tab === t 
                     ? 'flex items-center gap-3 px-8 py-5 text-sm font-bold whitespace-nowrap tab-active transition-all'
                     : 'flex items-center gap-3 px-8 py-5 text-sm font-bold whitespace-nowrap text-slate-400 hover:text-indigo-600 transition-all';
             });
@@ -375,7 +377,6 @@
             document.getElementById('b-id').value = id;
             document.getElementById('b-book-title').innerText = b.title;
             
-            // Calculate Return Date (Today + 7 Days)
             const returnDate = new Date();
             returnDate.setDate(returnDate.getDate() + 7);
             document.getElementById('b-return-date').innerText = returnDate.toLocaleDateString('th-TH', { 
